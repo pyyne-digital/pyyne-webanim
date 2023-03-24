@@ -1,4 +1,6 @@
-import { createContext } from "react";
+import { createContext, Dispatch, SetStateAction } from "react";
+
+type State<T> = readonly [T, Dispatch<SetStateAction<T>>];
 
 export namespace NSAnimation {
   export type Triggers = ({ time: number } | { flags: string[] }) &
@@ -37,6 +39,7 @@ export namespace NSAnimation {
 }
 
 export const defaultContext = {
+  halt: null! as State<boolean> | undefined,
   clock: 0,
   interval: 10,
 

@@ -12,8 +12,8 @@ import { AnimationEngine } from "../Engine";
 interface Props {
   id: string;
   halt?: [boolean, Dispatch<SetStateAction<boolean>>];
-  clockState?: [number, Dispatch<SetStateAction<number>>];
-  intervalState?: [number, Dispatch<SetStateAction<number>>];
+  clock?: [number, Dispatch<SetStateAction<number>>];
+  interval?: [number, Dispatch<SetStateAction<number>>];
 
   children: ReactNode;
 }
@@ -21,15 +21,15 @@ interface Props {
 export function Animation({
   id,
   halt: [_halt, _setHalt] = [null!, null!],
-  intervalState: [_interval, _setInterval] = [null!, null!],
+  interval: [_interval, _setInterval] = [null!, null!],
   children,
 }: Props) {
-  const [__halt, __setHalt] = useState(false),
+  const [__halt, __setHalt] = useState(true),
     [__interval, __setInterval] = useState(50),
-    [halt, setHalt] = [_halt || __halt, _setHalt || __setHalt],
+    [halt, setHalt] = [_halt ?? __halt, _setHalt ?? __setHalt],
     [interval, setInterval] = [
-      _interval || __interval,
-      _setInterval || __setInterval,
+      _interval ?? __interval,
+      _setInterval ?? __setInterval,
     ];
 
   const [engine] = useState(new AnimationEngine(id));
@@ -45,6 +45,7 @@ export function Animation({
   return (
     <AnimationEngineContext.Provider
       value={{
+        halt: [halt, setHalt],
         clock: engine.clock,
         interval: engine.interval,
         events: {},

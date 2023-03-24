@@ -43,9 +43,11 @@ export class AnimationEngine {
   }
 
   set interval(value: number) {
+    const halted = this.halt;
+
     this.halt = true;
     this.Interval = value;
-    this.halt = false;
+    this.halt = halted;
   }
 
   get halt() {
