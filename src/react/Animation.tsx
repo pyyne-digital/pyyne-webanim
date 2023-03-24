@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import {
   Dispatch,
   ReactNode,
@@ -27,10 +29,7 @@ export function Animation({
   const [__halt, __setHalt] = useState(true),
     [__interval, __setInterval] = useState(50),
     [halt, setHalt] = [_halt ?? __halt, _setHalt ?? __setHalt],
-    [interval, setInterval] = [
-      _interval ?? __interval,
-      _setInterval ?? __setInterval,
-    ];
+    [interval] = [_interval ?? __interval, _setInterval ?? __setInterval];
 
   const [engine] = useState(new AnimationEngine(id));
 
