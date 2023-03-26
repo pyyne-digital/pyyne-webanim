@@ -159,6 +159,15 @@ export class AnimationEngine {
     (fn: FnParameter, adjustment = 0) =>
       this.registerFrame(componentName)(id)(time)(fn, adjustment);
 
+  timerByIndexedId =
+    (componentName: string, id: string, i = 0) =>
+    (time: TimeParameter) =>
+    (fn: FnParameter, adjustment = 0) => {
+      this.registerFrame(componentName)(`${id}-${i}`)(time)(fn, adjustment);
+
+      return this.timerByIndexedId(componentName, id, i + 1);
+    };
+
   timer =
     (componentName: string, time: TimeParameter) =>
     (id: string) =>
