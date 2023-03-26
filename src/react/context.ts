@@ -1,4 +1,5 @@
 import { createContext, Dispatch, SetStateAction } from "react";
+import { AnimationEngine } from "../Engine";
 
 type State<T> = readonly [T, Dispatch<SetStateAction<T>>];
 
@@ -45,19 +46,7 @@ export const defaultContext = {
 
   events: {} as NSAnimation.EventCollection,
 
-  insert: (() => {
-    throw new Error("Context not initialised");
-  }) as (
-    componentName: string,
-    builder: NSAnimation.EventBuilder
-  ) => NSAnimation.Event,
-
-  remove: (() => {
-    throw new Error("Context not initialised");
-  }) as (
-    componentName: string,
-    eventId?: string
-  ) => NSAnimation.EventCollection[string] | NSAnimation.Event | null,
+  engine: null! as AnimationEngine,
 };
 
 export const AnimationEngineContext = createContext(defaultContext);

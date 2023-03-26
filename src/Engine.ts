@@ -14,6 +14,9 @@ type InitialisationOptions = Partial<{
   interval: number;
 }>;
 
+type TimeParameter = number | ((clock: number) => number);
+type FnParameter = (clock: number) => void;
+
 export class AnimationEngine {
   Id: string;
   Halt = true;
@@ -136,4 +139,29 @@ export class AnimationEngine {
       {}
     );
   };
+
+  registerFrame =
+    (componentName: string) =>
+    (id: string) =>
+    (time: TimeParameter) =>
+    (fn: FnParameter, adjustment = 0) =>
+      this.schedule(componentName, ({ clock }) => ({
+        id,
+        function: fn,
+        triggers: {
+          time: (typeof time === "function" ? time(clock) : time) + adjustment,
+        },
+      }));
+
+  timerById =
+    (componentName: string, id: string) =>
+    (time: TimeParameter) =>
+    (fn: FnParameter, adjustment = 0) =>
+      this.registerFrame(componentName)(id)(time)(fn, adjustment);
+
+  timer =
+    (componentName: string, time: TimeParameter) =>
+    (id: string) =>
+    (fn: FnParameter, adjustment = 0) =>
+      this.registerFrame(componentName)(id)(time)(fn, adjustment);
 }

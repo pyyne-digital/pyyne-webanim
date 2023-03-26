@@ -47,9 +47,8 @@ export function Animation({
         halt: [halt, setHalt],
         clock: engine.clock,
         interval: engine.interval,
-        events: {},
-        insert: engine.schedule,
-        remove: engine.deschedule,
+        events: engine.events,
+        engine,
       }}
     >
       {children}
