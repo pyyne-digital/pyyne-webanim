@@ -17,6 +17,15 @@ type InitialisationOptions = Partial<{
 type TimeParameter = number | ((clock: number) => number);
 type FnParameter = (clock: number) => void;
 
+type FrameBuilder = {
+  componentName: string;
+  id: string;
+  time: TimeParameter;
+  fn: FnParameter;
+
+  timeAdjustment: TimeParameter;
+};
+
 export class AnimationEngine {
   Id: string;
   Halt = true;
@@ -25,7 +34,7 @@ export class AnimationEngine {
   Interval = 50;
   intervals: NodeJS.Timer[] = [];
 
-  events: NSAnimation.EventCollection = {};
+  events: NSAnimation.ComponentCollection = {};
 
   constructor(id: string, { interval = 20 }: InitialisationOptions = {}) {
     this.Id = id;
@@ -89,7 +98,7 @@ export class AnimationEngine {
   };
 
   deschedule = (componentName: string, eventId?: string) => {
-    const collection = this.events[componentName],
+    const collection: NSAnimation.EventCollection = this.events[componentName],
       event = eventId ? collection?.[eventId] : null;
 
     if (!collection || (eventId && !event)) {
@@ -140,37 +149,46 @@ export class AnimationEngine {
     );
   };
 
-  registerFrame =
-    (componentName: string) =>
-    (id: string) =>
-    (time: TimeParameter) =>
-    (fn: FnParameter, adjustment = 0) =>
-      this.schedule(componentName, ({ clock }) => ({
-        id,
-        function: fn,
-        triggers: {
-          time: (typeof time === "function" ? time(clock) : time) + adjustment,
-        },
-      }));
+  buildFrame =
+    (x: Partial<FrameBuilder>) =>
+    (y: Partial<FrameBuilder> = {}) => {
+      const { componentName, id, time, fn } = { ...x, ...y };
 
-  timerById =
-    (componentName: string, id: string) =>
-    (time: TimeParameter) =>
-    (fn: FnParameter, adjustment = 0) =>
-      this.registerFrame(componentName)(id)(time)(fn, adjustment);
-
-  timerByIndexedId =
-    (componentName: string, id: string, i = 0) =>
-    (time: TimeParameter) =>
-    (fn: FnParameter, adjustment = 0) => {
-      this.registerFrame(componentName)(`${id}-${i}`)(time)(fn, adjustment);
-
-      return this.timerByIndexedId(componentName, id, i + 1);
+      return (
+        componentName && id && time && fn
+          ? this.registerFrames
+          : this.buildFrame
+      )({ ...x, ...y } as FrameBuilder);
     };
 
-  timer =
-    (componentName: string, time: TimeParameter) =>
-    (id: string) =>
-    (fn: FnParameter, adjustment = 0) =>
-      this.registerFrame(componentName)(id)(time)(fn, adjustment);
+  registerFrames = (...builders: Partial<FrameBuilder>[]) =>
+    builders.map(
+      ({ componentName, id, time, fn, timeAdjustment }) =>
+        [
+          (y: Partial<FrameBuilder>) =>
+            this.registerFrames({
+              componentName,
+              id,
+              time,
+              fn,
+              timeAdjustment,
+              ...y,
+            }),
+          componentName && id && typeof time !== "undefined" && fn
+            ? this.schedule(componentName, ({ clock }) => ({
+                id,
+                function: fn,
+                triggers: {
+                  time:
+                    (typeof time === "function" ? time(clock) : time) +
+                    (timeAdjustment
+                      ? typeof timeAdjustment === "function"
+                        ? timeAdjustment(clock)
+                        : timeAdjustment
+                      : 0),
+                },
+              }))
+            : null,
+        ] as const
+    );
 }

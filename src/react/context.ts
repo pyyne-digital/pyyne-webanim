@@ -33,9 +33,11 @@ export namespace NSAnimation {
   };
 
   export type EventCollection = {
-    [componentName: string]: {
-      [eventId: string]: NSAnimation.Event;
-    };
+    [eventId: string]: NSAnimation.Event;
+  };
+
+  export type ComponentCollection = {
+    [componentName: string]: EventCollection;
   };
 }
 
@@ -44,7 +46,7 @@ export const defaultContext = {
   clock: 0,
   interval: 10,
 
-  events: {} as NSAnimation.EventCollection,
+  events: {} as NSAnimation.ComponentCollection,
 
   engine: null! as AnimationEngine,
 };
